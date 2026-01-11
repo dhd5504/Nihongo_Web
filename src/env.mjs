@@ -21,10 +21,10 @@ export const env = createEnv({
    */
   client: {
     NEXT_PUBLIC_API_BASE_URL: z.string().url(),
-    NEXT_PUBLIC_W3_API_BASE_URL: z.string().url(),
+    NEXT_PUBLIC_W3_API_BASE_URL: z.string().optional(),
     NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: z.string().min(1),
-    NEXT_PUBLIC_TOKEN_ADDRESS: z.string().min(1),
-    NEXT_PUBLIC_SHOP_ADDRESS: z.string().min(1),
+    NEXT_PUBLIC_TOKEN_ADDRESS: z.string().optional(),
+    NEXT_PUBLIC_SHOP_ADDRESS: z.string().optional(),
   },
 
   /**
