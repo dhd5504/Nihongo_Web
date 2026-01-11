@@ -292,8 +292,8 @@ export const LoginScreen = ({
               className="grow rounded-2xl border-2 border-gray-200 bg-gray-50 px-4 py-3"
               placeholder={
                 loginScreenState === "LOGIN"
-                  ? "Email hoặc tên đăng nhập"
-                  : "Email"
+                  ? "Tên đăng nhập"
+                  : "Username"
               }
               value={form.email}
               onChange={(e) =>
