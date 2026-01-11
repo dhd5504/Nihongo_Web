@@ -37,8 +37,10 @@ export const OrderChallenge = ({
         if (disabled || status !== "none") return;
 
         const word = selectedWords[index];
-        setAvailableWords([...availableWords, word]);
-        setSelectedWords(selectedWords.filter((_, i) => i !== index));
+        if (word !== undefined) {
+            setAvailableWords([...availableWords, word]);
+            setSelectedWords(selectedWords.filter((_, i) => i !== index));
+        }
     };
 
     useEffect(() => {
