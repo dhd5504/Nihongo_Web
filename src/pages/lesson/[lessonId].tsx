@@ -16,6 +16,8 @@ export enum LESSON_TYPE {
   LESSON = "lesson",
   TEST = "test",
   MULTIPLE_CHOICE = "MULTIPLE_CHOICE",
+  SENTENCE_MATCHING = "SENTENCE_MATCHING",
+  SENTENCE_ORDERING = "SENTENCE_ORDERING",
 }
 
 type ChallengeOption = {
@@ -111,7 +113,7 @@ const LessonIdPage: NextPage<LessonPageProps> = ({
             challengeId: Number(challenge.challengeId),
             imageSrc: challenge.imageSrc ?? "",
             audioSrc: challenge.audioSrc ?? "",
-            challengeOptions: challenge.challengeOptions.map((option) => ({
+            challengeOptions: (challenge.challengeOptions || []).map((option: any) => ({
               ...option,
               id: Number(option.id),
               challengeId: Number(challenge.challengeId),
@@ -121,6 +123,7 @@ const LessonIdPage: NextPage<LessonPageProps> = ({
               audioSrc: option.audioSrc ?? "",
             })),
             type: String(challenge.type),
+            pairs: (challenge as any).pairs,
           }))}
           initialPercentage={initialPercentage}
           isTest={state === LESSON_TYPE.TEST}

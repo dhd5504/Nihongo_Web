@@ -28,6 +28,7 @@ import { Footer } from "./footer";
 import { Header } from "./header";
 import { QuestionBubble } from "./question-bubble";
 import { ResultCard } from "./result-card";
+import { PairMatching } from "./pair-matching";
 
 type QuizProps = {
   initialPercentage: number;
@@ -50,6 +51,11 @@ type QuizProps = {
     }[];
     completed: boolean;
     type: string;
+    pairs?: {
+      id: number;
+      japanese: string;
+      vietnamese: string;
+    }[];
   }[];
   isTest: boolean;
   isLesson: boolean;
@@ -102,12 +108,14 @@ export const Quiz = ({
 
   const [selectedOption, setSelectedOption] = useState<number>();
   const [status, setStatus] = useState<"none" | "wrong" | "correct">("none");
+  const [isPairingCompleted, setIsPairingCompleted] = useState(false);
 
   const challenge = challenges[activeIndex];
   const options = challenge?.challengeOptions ?? [];
 
   const onNext = () => {
     setActiveIndex((current) => current + 1);
+    setIsPairingCompleted(false);
   };
 
   const onSelect = (id: number) => {
@@ -117,7 +125,7 @@ export const Quiz = ({
   };
 
   const onContinue = async () => {
-    if (!selectedOption) return;
+    if (!selectedOption && !isPairingCompleted) return;
 
     if (status === "wrong") {
       if (isLesson) {
@@ -135,10 +143,23 @@ export const Quiz = ({
       return;
     }
 
+    const userId = getIdUserByToken();
+
+    if (challenge && challenge.type === "PAIR_MATCHING") {
+      void correctControls.play();
+      setCorrectQuestions(correctQuestions + 1);
+      setStatus("correct");
+      setPercentage((prev) => prev + 100 / challenges.length);
+      setChallenges((prevChallenges) =>
+        prevChallenges.map((ch) =>
+          ch.id === challenge?.id ? { ...ch, completed: true } : ch,
+        ),
+      );
+      return;
+    }
+
     const correctOption = options.find((option) => option.isCorrect);
     if (!correctOption) return;
-
-    const userId = getIdUserByToken();
 
     if (isTest) {
       if (correctOption.id === selectedOption) {
@@ -358,7 +379,7 @@ export const Quiz = ({
   }
 
   const title =
-    challenge.type === "ASSIST"
+    challenge.type === "ASSIST" || challenge.type === "SENTENCE_MATCHING" || challenge.type === "SENTENCE_ORDERING"
       ? "Select the correct meaning"
       : challenge.question;
 
@@ -380,21 +401,31 @@ export const Quiz = ({
                 <QuestionBubble question={challenge.question ?? ""} />
               )}
 
-              <Challenge
-                options={options}
-                onSelect={onSelect}
-                status={status}
-                selectedOption={selectedOption}
-                disabled={pending}
-                type={challenge.type}
-              />
+              {challenge.type === "PAIR_MATCHING" ? (
+                <PairMatching
+                  pairs={challenge.pairs || []}
+                  onComplete={() => {
+                    setIsPairingCompleted(true);
+                  }}
+                  disabled={pending || status === "correct"}
+                />
+              ) : (
+                <Challenge
+                  options={options}
+                  onSelect={onSelect}
+                  status={status}
+                  selectedOption={selectedOption}
+                  disabled={pending}
+                  type={challenge.type}
+                />
+              )}
             </div>
           </div>
         </div>
       </div>
 
       <Footer
-        disabled={pending || !selectedOption}
+        disabled={pending || (challenge.type === "PAIR_MATCHING" ? !isPairingCompleted : !selectedOption)}
         status={status}
         onCheck={onContinue}
         isTest={isTest}
