@@ -1,5 +1,6 @@
 import axios from "axios";
 import { env } from "~/env.mjs";
+import { getAuthHeaders } from "~/utils/authHeaders";
 
 const API_BASE_URL = env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -26,29 +27,36 @@ export const getPractices = () => {
   return;
 };
 
-export const updateProfile = async ({
-  userId,
-  name,
-  phoneNumber,
-  password,
-  avatar,
-}: {
-  userId: number;
-  name: string;
-  phoneNumber: string;
-  password: string;
-  avatar?: string | null;
-}) => {
-  return await axios.put(`${API_BASE_URL}/api/user/update-info`, {
+export const updateProfile = async (
+  {
     userId,
     name,
     phoneNumber,
     password,
     avatar,
-  });
+  }: {
+    userId: number;
+    name: string;
+    phoneNumber: string;
+    password: string;
+    avatar?: string | null;
+  },
+  token?: string
+) => {
+  return await axios.put(
+    `${API_BASE_URL}/api/user/update-info`,
+    {
+      userId,
+      name,
+      phoneNumber,
+      password,
+      avatar,
+    },
+    { headers: getAuthHeaders(token) }
+  );
 };
 
-export const getProfile = async (userId: number) => {
+export const getProfile = async (userId: number, token?: string) => {
   try {
     const response = await axios.get<{
       name: string;
@@ -56,7 +64,9 @@ export const getProfile = async (userId: number) => {
       phone: string;
       email: string;
       avatar?: string | null;
-    }>(`${API_BASE_URL}/api/user/info/${userId}`);
+    }>(`${API_BASE_URL}/api/user/info/${userId}`, {
+      headers: getAuthHeaders(token),
+    });
 
     return response.data;
   } catch (error) {
@@ -70,7 +80,7 @@ export const getProfile = async (userId: number) => {
   }
 };
 
-export const experienceByLevel = async (level: string) => {
+export const experienceByLevel = async (level: string, token?: string) => {
   try {
     const response = await axios.get<
       {
@@ -78,11 +88,13 @@ export const experienceByLevel = async (level: string) => {
         name: string;
         exp: number;
       }[]
-    >(`${API_BASE_URL}/api/user/experience-by-level?level=${level}`);
+    >(`${API_BASE_URL}/api/user/experience-by-level?level=${level}`, {
+      headers: getAuthHeaders(token),
+    });
 
     return response.data;
   } catch (error) {
-    console.error("Error updating right answer:", error);
+    console.error("Error fetching experience by level:", error);
     return null;
   }
 };
@@ -90,10 +102,13 @@ export const experienceByLevel = async (level: string) => {
 export const updateQuestionRightAnswer = async (
   questionId: number,
   userId: number,
+  token?: string
 ) => {
   try {
     const response = await axios.post(
       `${API_BASE_URL}/api/questions/right-answer?userId=${userId}&questionId=${questionId}&type=MULTIPLE_CHOICE`,
+      null,
+      { headers: getAuthHeaders(token) }
     );
 
     return response.data;
@@ -106,10 +121,13 @@ export const updateQuestionRightAnswer = async (
 export const updateQuestionWrongAnswer = async (
   questionId: number,
   userId: number,
+  token?: string
 ) => {
   try {
     const response = await axios.post(
       `${API_BASE_URL}/api/questions/wrong-answer?userId=${userId}&questionId=${questionId}&type=MULTIPLE_CHOICE`,
+      null,
+      { headers: getAuthHeaders(token) }
     );
     console.log(response.data.message);
     return response.data;
@@ -119,25 +137,28 @@ export const updateQuestionWrongAnswer = async (
   }
 };
 
-export const updateStatusLesson = async (lessonId: number, userId: number) => {
+export const updateStatusLesson = async (lessonId: number, userId: number, token?: string) => {
   try {
     const response = await axios.post(
       `${API_BASE_URL}/api/units/update-status?userId=${userId}&lessonId=${lessonId}`,
+      null,
+      { headers: getAuthHeaders(token) }
     );
+    return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.status === 400) {
       return null;
     }
-    console.log("Error updating lesson status:", error);
+    console.error("Error updating lesson status:", error);
     throw error;
   }
 };
 
-export const getUnits = async (userId: number, headers?: Record<string, string>): Promise<Unit[]> => {
+export const getUnits = async (userId: number, token?: string): Promise<Unit[]> => {
   try {
     const response = await axios.get<Unit[]>(
       `${API_BASE_URL}/api/units?userId=${userId}`,
-      headers ? { headers } : {}
+      { headers: getAuthHeaders(token) }
     );
     return response.data ?? [];
   } catch (error) {
@@ -146,23 +167,26 @@ export const getUnits = async (userId: number, headers?: Record<string, string>)
   }
 };
 
-export const getLessonById = async (lessonId: number) => {
-  const response = await axios.get(`${API_BASE_URL}/lessons/${lessonId}`);
+export const getLessonById = async (lessonId: number, token?: string) => {
+  const response = await axios.get(
+    `${API_BASE_URL}/lessons/${lessonId}`,
+    { headers: getAuthHeaders(token) }
+  );
   return response.data;
 };
 
-export const getCurrentLesson = async (userId: number) => {
-  const units = await getUnits(userId);
+export const getCurrentLesson = async (userId: number, token?: string) => {
+  const units = await getUnits(userId, token);
   const currentLesson = units
     .flatMap((unit: { lessons: any[] }) => unit.lessons)
     .find((lesson: { status: string }) => lesson.status === "current");
 
   if (!currentLesson) return null;
-  return await getLessonById(currentLesson.id);
+  return await getLessonById(currentLesson.id, token);
 };
 
-export const getPreviousLessons = async (userId: number) => {
-  const units = await getUnits(userId);
+export const getPreviousLessons = async (userId: number, token?: string) => {
+  const units = await getUnits(userId, token);
   const lessons = units.flatMap((unit: { lessons: any[] }) => unit.lessons);
   const currentLesson = lessons.find(
     (lesson: { status: string }) => lesson.status === "current",
@@ -173,11 +197,11 @@ export const getPreviousLessons = async (userId: number) => {
   );
 };
 
-export const getPracticeChallenges = async (userId: number) => {
-  const previousLessons = await getPreviousLessons(userId);
+export const getPracticeChallenges = async (userId: number, token?: string) => {
+  const previousLessons = await getPreviousLessons(userId, token);
   const challenges = [];
   for (const lesson of previousLessons) {
-    const lessonDetails = await getLessonById(lesson.id);
+    const lessonDetails = await getLessonById(lesson.id, token);
     const incompleteChallenges = lessonDetails.challenges.filter(
       (challenge: { completed: boolean }) => !challenge.completed,
     );
@@ -187,8 +211,8 @@ export const getPracticeChallenges = async (userId: number) => {
   return challenges;
 };
 
-export const isLessonCompleted = async (lessonId: number, userId: number) => {
-  const units = await getUnits(userId);
+export const isLessonCompleted = async (lessonId: number, userId: number, token?: string) => {
+  const units = await getUnits(userId, token);
   const lesson = units
     .flatMap((unit: { lessons: any[] }) => unit.lessons)
     .find((lesson: { id: number; status: string }) => lesson.id === lessonId);
@@ -200,6 +224,7 @@ export const getLesson = async (
   lessonId: number,
   userId: number,
   type: string,
+  token?: string,
 ) => {
   const response = await axios.get<
     {
@@ -210,7 +235,9 @@ export const getLesson = async (
       completed: boolean;
       challengeOptions: any;
     }[]
-  >(`${API_BASE_URL}/api/questions/${lessonId}?userId=${userId}&type=${type}`);
+  >(`${API_BASE_URL}/api/questions/${lessonId}?userId=${userId}&type=${type}`, {
+    headers: getAuthHeaders(token),
+  });
 
   return response.data;
 };
@@ -218,32 +245,31 @@ export const getLesson = async (
 export const getPracticeUnit = async (
   userId: number,
   unitId: number | undefined,
+  token?: string,
 ) => {
   if (unitId === undefined) return null;
 
   const response = await axios.get(
     `${API_BASE_URL}/api/questions/practice-by-unit?userId=${userId}&unitId=${unitId}&type=MULTIPLE_CHOICE`,
+    { headers: getAuthHeaders(token) }
   );
 
   return response.data;
 };
-export const checkNewUser = async (
-  userId: number,
-) => {
-  const A = 36;
+export const checkNewUser = async (userId: number, token?: string) => {
   const response = await axios.get(
     `${API_BASE_URL}/api/user/check-new-user/${userId}`,
+    { headers: getAuthHeaders(token) }
   );
 
   return response.data;
 };
-export const setUserLevel = async (
-  userId: number,
-  level: string,
-) => {
+export const setUserLevel = async (userId: number, level: string, token?: string) => {
   try {
     const response = await axios.post(
       `${API_BASE_URL}/api/units/set-level?userId=${userId}&level=${level}`,
+      null,
+      { headers: getAuthHeaders(token) }
     );
     return response.data;
   } catch (error) {
@@ -252,7 +278,7 @@ export const setUserLevel = async (
     } else {
       console.error('Unexpected error:', error);
     }
-    throw error; // Re-throw the error after logging it
+    throw error;
   }
 };
 export const getUserProgress = async () => {
@@ -305,9 +331,12 @@ export const addUserXp = async (
   userId: number,
   lessonId: number,
   score: number,
+  token?: string
 ) => {
   const response = await axios.post<number>(
     `${API_BASE_URL}/api/user-progress/add-xp?userId=${userId}&lessonId=${lessonId}&score=${score}`,
+    null,
+    { headers: getAuthHeaders(token) }
   );
   return response.data;
 };

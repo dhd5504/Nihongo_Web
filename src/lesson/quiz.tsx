@@ -210,8 +210,17 @@ export const Quiz = ({
 
   const handleCompleted = async () => {
     const userId = getIdUserByToken();
+    const lessonIdValue = Number(params.lessonId);
 
-    await updateStatusLesson(Number(params.lessonId), Number(userId));
+    // Validate IDs before calling API to prevent NaN errors
+    if (!userId || isNaN(userId) || isNaN(lessonIdValue)) {
+      console.error("Invalid userId or lessonId:", { userId, lessonId: params.lessonId });
+      addToast("Error: Invalid lesson or user data", "error");
+      router.push("/learn");
+      return;
+    }
+
+    await updateStatusLesson(lessonIdValue, userId);
 
     // Check if score is sufficient (must be 100%)
     if (correctQuestions !== challenges.length) {

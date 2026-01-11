@@ -68,25 +68,23 @@ const ChatPage: NextPage = () => {
     <div className="flex min-h-screen flex-col">
       <TopBar />
       <div className="flex flex-1">
-        <LeftBar selectedTab="Chat Bot AI" />
-        <main className="flex flex-1 flex-col px-6 py-6 md:ml-32 lg:ml-64">
-          <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-4 rounded-2xl border-2 border-gray-200 bg-white p-4 shadow-sm md:p-6">
-            <h1 className="text-2xl font-bold text-gray-800">Chat Bot AI</h1>
-            <div className="flex flex-1 flex-col overflow-hidden rounded-xl border border-gray-100 bg-gray-50">
-              <div className="flex-1 space-y-3 overflow-y-auto p-4">
+        <LeftBar selectedTab="Chat" />
+        <main className="flex flex-1 flex-col px-3 py-3 md:ml-32 md:px-6 md:py-6 lg:ml-64">
+          <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-4 rounded-2xl border-2 border-gray-200 bg-white p-3 shadow-sm md:p-6">
+            <h1 className="text-xl font-bold text-gray-800 md:text-2xl">Chat</h1>
+            <div className="flex flex-1 flex-col overflow-hidden rounded-xl border border-gray-100 bg-gray-50 min-h-0">
+              <div className="flex-1 space-y-3 overflow-y-auto p-3 md:p-4" style={{ maxHeight: 'calc(100vh - 250px)', minHeight: '300px' }}>
                 {messages.map((m, idx) => (
                   <div
                     key={idx}
-                    className={`flex ${
-                      m.role === "user" ? "justify-end" : "justify-start"
-                    }`}
+                    className={`flex ${m.role === "user" ? "justify-end" : "justify-start"
+                      }`}
                   >
                     <div
-                      className={`max-w-[80%] whitespace-pre-line rounded-2xl px-4 py-2 text-sm shadow-sm ${
-                        m.role === "user"
+                      className={`max-w-[80%] whitespace-pre-line rounded-2xl px-3 py-2 text-sm shadow-sm md:px-4 ${m.role === "user"
                           ? "bg-green-500 text-white"
                           : "bg-white text-gray-800 border border-gray-100"
-                      }`}
+                        }`}
                     >
                       {m.text}
                     </div>
@@ -94,31 +92,31 @@ const ChatPage: NextPage = () => {
                 ))}
                 {loading && (
                   <div className="flex justify-start">
-                    <div className="rounded-2xl border border-gray-200 bg-white px-4 py-2 text-sm text-gray-500 shadow-sm">
+                    <div className="rounded-2xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-500 shadow-sm md:px-4">
                       Đang nghĩ...
                     </div>
                   </div>
                 )}
                 <div ref={chatEndRef} />
               </div>
-              <div className="border-t border-gray-200 bg-white p-3">
+              <div className="border-t border-gray-200 bg-white p-2 md:p-3">
                 <div className="flex items-end gap-2">
                   <textarea
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder="Nhập câu hỏi của bạn..."
-                    className="min-h-[56px] flex-1 resize-none rounded-2xl border border-gray-200 p-3 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100"
+                    className="min-h-[48px] flex-1 resize-none rounded-2xl border border-gray-200 p-2 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100 md:min-h-[56px] md:p-3"
                   />
                   <button
                     onClick={() => void sendMessage()}
                     disabled={loading || input.trim() === ""}
-                    className="rounded-2xl bg-green-500 px-4 py-3 text-sm font-bold uppercase text-white transition hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-gray-300"
+                    className="rounded-2xl bg-green-500 px-3 py-2 text-sm font-bold uppercase text-white transition hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-gray-300 md:px-4 md:py-3"
                   >
                     Gửi
                   </button>
                 </div>
-                <p className="mt-2 text-xs text-gray-400">
+                <p className="mt-1 text-xs text-gray-400 md:mt-2">
                   Enter để gửi, Shift+Enter để xuống dòng.
                 </p>
               </div>

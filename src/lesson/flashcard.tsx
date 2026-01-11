@@ -100,10 +100,19 @@ const FlashcardSet: FC<FlashcardSetProps> = (props) => {
     try {
       setIsCompleted(true);
       const userId = getIdUserByToken();
-      await updateStatusLesson(Number(lessonId), Number(userId));
+      const lessonIdValue = Number(lessonId);
+
+      // Validate IDs before calling API to prevent NaN errors
+      if (!userId || isNaN(userId) || isNaN(lessonIdValue)) {
+        console.error("Invalid userId or lessonId:", { userId, lessonId });
+        SessionStorage.delete(SessionKey.LESSON_ID);
+        return await router.push("/learn");
+      }
+
+      await updateStatusLesson(lessonIdValue, userId);
       SessionStorage.delete(SessionKey.LESSON_ID);
       return await router.push("/learn");
-    } catch (error) {}
+    } catch (error) { }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>): void => {
@@ -148,9 +157,8 @@ const FlashcardSet: FC<FlashcardSetProps> = (props) => {
             aria-label="Flashcard"
           >
             <div
-              className={`preserve-3d h-full w-full transform-gpu cursor-pointer transition-transform duration-700 ${
-                isFlipped ? "rotate-y-180" : ""
-              }`}
+              className={`preserve-3d h-full w-full transform-gpu cursor-pointer transition-transform duration-700 ${isFlipped ? "rotate-y-180" : ""
+                }`}
               onClick={handleFlip}
             >
               <div className="backface-hidden absolute flex h-full w-full items-center justify-center rounded-xl bg-white p-8 shadow-2xl">

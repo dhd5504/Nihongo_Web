@@ -166,18 +166,28 @@ export async function getServerSideProps({
   const typeParam = Array.isArray(query.type) ? query.type[0] : query.type;
   const stateParam = Array.isArray(query.state) ? query.state[0] : query.state;
 
-  const lesson = await getLesson(
-    Number(lessonId),
-    jwtPayload.id,
-    String(typeParam ?? ""),
-  );
+  try {
+    const lesson = await getLesson(
+      Number(lessonId),
+      jwtPayload.id,
+      String(typeParam ?? ""),
+      myCookie, // Pass JWT token for SSR authentication
+    );
 
-  return {
-    props: {
-      lesson,
-      type: typeParam ?? "",
-      lessonId,
-      state: stateParam ?? "",
-    },
-  };
+    return {
+      props: {
+        lesson,
+        type: typeParam ?? "",
+        lessonId,
+        state: stateParam ?? "",
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching lesson:", error);
+    return {
+      redirect: {
+        destination: "/learn",
+      },
+    };
+  }
 }

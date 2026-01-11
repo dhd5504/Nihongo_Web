@@ -96,13 +96,10 @@ export async function getServerSideProps({
   }>(token);
 
   const level = String(query.level ?? "");
-  const headers = {
-    Authorization: `Bearer ${token}`,
-  };
 
   const [userProgress, units] = await Promise.all([
     getUserProgress(),
-    getUnits(jwtPayload.id, headers),
+    getUnits(jwtPayload.id, token),
   ]);
 
   return {

@@ -10,7 +10,7 @@ import { useBoundStore } from "src/hooks/useBoundStore";
 import { logout } from "~/utils/JWTService";
 import { ChatBotIcon } from "./ChatBotIcon";
 
-type SidebarTab = Tab | "Chat Bot AI";
+type SidebarTab = Tab | "Chat";
 
 const LeftBarMoreMenuSvg = (props: ComponentProps<"svg">) => {
   return (
@@ -46,7 +46,7 @@ export const LeftBar = ({
     useState<LoginScreenState>("HIDDEN");
 
   const bottomBarItems = useBottomBarItems();
-  const isChatSelected = selectedTab === "Chat Bot AI";
+  const isChatSelected = selectedTab === "Chat";
 
   return (
     <>
@@ -92,7 +92,7 @@ export const LeftBar = ({
               ].join(" ")}
             >
               <ChatBotIcon className="h-10 w-10" />
-              <span className="sr-only lg:not-sr-only">Chat Bot AI</span>
+              <span className="sr-only lg:not-sr-only">Chat</span>
             </Link>
           </li>
           <div

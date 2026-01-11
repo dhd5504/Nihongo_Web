@@ -72,9 +72,6 @@ const PracticePage: NextPage<PracticePageProps> = ({
           {practiceLessons.length === 0 ? (
             <div className="flex h-screen w-screen items-center justify-center bg-gray-100">
               <div className="text-center">
-                <p className="text-5xl font-medium text-gray-600">
-                  Oops! Trang này chưa khả dụng
-                </p>
                 <p className="mt-4 text-gray-500">
                   Có vẻ bạn đã hoàn thành hoặc chưa đến phần này!
                 </p>
@@ -176,25 +173,31 @@ export async function getServerSideProps({
     : query.unitId; // Access searchParams
 
   if (unitIdParam) {
-    const practiceLessons = await getPracticeUnit(
-      jwtPayload.id,
-      Number(unitIdParam.toString()),
-    );
+    try {
+      const practiceLessons = await getPracticeUnit(
+        jwtPayload.id,
+        Number(unitIdParam.toString()),
+        myCookie, // Pass JWT token for SSR authentication
+      );
 
-    return {
-      props: {
-        practiceLessons: practiceLessons ?? [],
-        practices: [],
-        unitId: unitIdParam,
-      },
-    };
+      return {
+        props: {
+          practiceLessons: practiceLessons ?? [],
+          practices: [],
+          unitId: unitIdParam,
+        },
+      };
+    } catch (error) {
+      console.error("Error fetching practice unit:", error);
+      return {
+        redirect: {
+          destination: "/practice",
+        },
+      };
+    }
   }
 
-  const headers = {
-    Authorization: `Bearer ${myCookie}`,
-  };
-
-  const practices = await getUnits(jwtPayload.id, headers);
+  const practices = await getUnits(jwtPayload.id, myCookie);
 
   return {
     props: {

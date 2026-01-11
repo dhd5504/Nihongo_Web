@@ -149,14 +149,10 @@ export async function getServerSideProps({ req }: GetServerSidePropsContext) {
     id: number;
   }>(myCookie);
 
-  // Send JWT token via Authorization header for server-side authentication
-  const headers = {
-    Authorization: `Bearer ${myCookie}`,
-  };
 
   const [userProgress, units] = await Promise.all([
     getUserProgress(),
-    getUnits(jwtPayload.id, headers),
+    getUnits(jwtPayload.id, myCookie),
   ]);
 
   const filteredUnits =

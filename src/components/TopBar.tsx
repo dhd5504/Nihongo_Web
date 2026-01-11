@@ -13,6 +13,8 @@ import {
   MoreOptionsSvg,
   PodcastIconSvg,
 } from "./Svgs";
+import { logout } from "~/utils/JWTService";
+import { ChatBotIcon } from "./ChatBotIcon";
 
 const EmptyFireTopBarSvg = (props: ComponentProps<"svg">) => {
   return (
@@ -76,6 +78,12 @@ export const TopBar = ({
   const streak = useBoundStore((x) => x.streak);
   const lingots = useBoundStore((x) => x.lingots);
   const language = useBoundStore((x) => x.language);
+
+  const handleLogout = () => {
+    logout(() => {
+      window.location.href = "/";
+    });
+  };
   return (
     <header className="fixed z-20 h-[58px] w-full">
       <div
@@ -203,6 +211,23 @@ export const TopBar = ({
                       <GlobeIconSvg className="h-10 w-10" />
                       Schools
                     </Link>
+                    <Link
+                      className="flex items-center gap-2 border-t-2 border-gray-300 p-2 font-bold text-gray-700"
+                      href="/chat"
+                    >
+                      <ChatBotIcon className="h-10 w-10" />
+                      Chat
+                    </Link>
+                    <button
+                      className="flex items-center gap-2 border-t-2 border-gray-300 p-2 font-bold text-gray-700 text-left"
+                      onClick={handleLogout}
+                    >
+                      <svg className="h-10 w-10" viewBox="0 0 46 46" fill="none">
+                        <path d="M17 7L31 23L17 39" stroke="#4B5563" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M7 23H29" stroke="#4B5563" strokeWidth="3" strokeLinecap="round" />
+                      </svg>
+                      Đăng xuất
+                    </button>
                   </div>
                 );
 
