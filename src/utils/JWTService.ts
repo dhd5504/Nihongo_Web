@@ -63,6 +63,15 @@ export function logout(navigate: any) {
     });
 }
 
+export function processLoginResponse(token: string) {
+  const decodedToken = jwtDecode<JwtPayload>(token);
+
+  // Set cookies on the frontend domain so JS/SSR can read them
+  // Expiry: 1 day (matches backend)
+  Cookies.set("token", token, { expires: 1, secure: true, sameSite: "Lax" });
+  Cookies.set("uid", String(decodedToken.id), { expires: 1, secure: true, sameSite: "Lax" });
+}
+
 export function setToken(token: string) {
   // kept for backward compatibility; avoid using when HttpOnly cookie is set from server
   Cookies.set("token", token, { expires: 1, secure: true, sameSite: "Strict" });

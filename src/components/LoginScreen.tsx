@@ -7,7 +7,7 @@ import { useRouter } from "next/router";
 import { checkNewUser, signin, signup } from "~/db/queries";
 import Fetching from "./Fetching";
 import { useToast } from "~/context/toast";
-import { getIdUserByToken } from "~/utils/JWTService";
+import { getIdUserByToken, processLoginResponse } from "~/utils/JWTService";
 import { isAxiosError } from "axios";
 
 export const GoogleLogoSvg = (props: ComponentProps<"svg">) => {
@@ -174,6 +174,11 @@ export const LoginScreen = ({
           username: form.email,
           password: form.password,
         });
+
+        if (user.jwt) {
+          processLoginResponse(user.jwt);
+        }
+
         const userId = getIdUserByToken();
         setForm({
           username: "",
@@ -297,12 +302,12 @@ export const LoginScreen = ({
               }
               value={form.email}
               onChange={(e) =>
-                  setForm({
-                    ...form,
-                    email: e.target.value,
-                  })
-                }
-              />
+                setForm({
+                  ...form,
+                  email: e.target.value,
+                })
+              }
+            />
             {errors.email && (
               <p className="mt-1 text-xs text-rose-500">{errors.email}</p>
             )}
@@ -313,12 +318,12 @@ export const LoginScreen = ({
                 type="password"
                 value={form.password}
                 onChange={(e) =>
-                    setForm({
-                      ...form,
-                      password: e.target.value,
-                    })
-                  }
-                />
+                  setForm({
+                    ...form,
+                    password: e.target.value,
+                  })
+                }
+              />
               {errors.password && (
                 <p className="mt-1 text-xs text-rose-500">{errors.password}</p>
               )}
