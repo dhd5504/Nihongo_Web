@@ -3,14 +3,16 @@ import type { BoundStateCreator } from "~/hooks/useBoundStore";
 import type { DateString } from "~/utils/dateString";
 import { toDateString } from "~/utils/dateString";
 
-type ActiveDays = Set<DateString>;
+type ActiveDays = DateString[];
 
 const addActiveDay = (activeDays: ActiveDays, day: dayjs.Dayjs): ActiveDays => {
-  return new Set([...activeDays, toDateString(day)]);
+  const dateStr = toDateString(day);
+  if (activeDays.includes(dateStr)) return activeDays;
+  return [...activeDays, dateStr];
 };
 
 const isActiveDay = (activeDays: ActiveDays, day: dayjs.Dayjs): boolean => {
-  return activeDays.has(toDateString(day));
+  return activeDays.includes(toDateString(day));
 };
 
 const getCurrentStreak = (activeDays: ActiveDays): number => {
@@ -34,7 +36,7 @@ export const createStreakSlice: BoundStateCreator<StreakSlice> = (
   set,
   get,
 ) => ({
-  activeDays: new Set(),
+  activeDays: [],
   streak: 0,
   isActiveDay: (day: dayjs.Dayjs) => isActiveDay(get().activeDays, day),
   addToday: () => {

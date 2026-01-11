@@ -1660,9 +1660,9 @@ export const ActiveTreasureSvg = () => {
   );
 };
 
-export const GoldenTreasureSvg = () => {
+export const GoldenTreasureSvg = (props: React.ComponentProps<"svg">) => {
   return (
-    <svg width="80" height="90" viewBox="0 0 80 90" fill="none">
+    <svg width="80" height="90" viewBox="0 0 80 90" fill="none" {...props}>
       <rect opacity="0.3" y="49" width="80" height="40" rx="4" fill="#AFAFAF" />
       <path
         d="M9.43689 49.1673C9.43689 43.6308 13.9251 39.1426 19.4616 39.1426H61.9037C67.4402 39.1426 71.9284 43.6308 71.9284 49.1673V75.7509C71.9284 77.9655 70.1332 79.7608 67.9186 79.7608H13.4468C11.2322 79.7608 9.43689 77.9655 9.43689 75.7509V49.1673Z"

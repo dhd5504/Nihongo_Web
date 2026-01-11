@@ -26,8 +26,8 @@ const Account: NextPage<{
     password: string;
     confirmPassword: string;
   }>({
-    name: profile.name,
-    phoneNumber: profile.phone,
+    name: profile.name ?? "",
+    phoneNumber: profile.phone ?? "",
     password: "",
     confirmPassword: "",
   });
@@ -172,7 +172,7 @@ const Account: NextPage<{
               handleSave();
             }}
             type="button"
-            disabled={loading || form.name === "" || form.phoneNumber === ""}
+            disabled={loading}
           >
             Lưu
           </button>
@@ -415,7 +415,7 @@ export async function getServerSideProps({ req }: GetServerSidePropsContext) {
     id: number;
   }>(myCookie);
 
-  const profile = await getProfile(jwtPayload.id);
+  const profile = await getProfile(jwtPayload.id, myCookie);
 
   return {
     props: { profile },

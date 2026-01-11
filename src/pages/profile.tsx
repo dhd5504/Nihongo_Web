@@ -15,8 +15,9 @@ import {
   SettingsGearSvg,
 } from "~/components/Svgs";
 import { getProfile } from "~/db/queries";
-import { getToken, manualParsedCookies } from "~/utils/JWTService";
+import { isToken, manualParsedCookies } from "~/utils/JWTService";
 import { useWalletStore } from "~/stores/useWalletStore";
+import { useBoundStore } from "~/hooks/useBoundStore";
 import { getTokenContract } from "~/utils/contracts";
 import { ethers } from "ethers";
 
@@ -66,15 +67,9 @@ const ProfileTopBar = () => {
 };
 const ProfileTopSection = ({ userData }: { userData: UserData }) => {
   const router = useRouter();
-  const loggedIn = getToken; // Replace with your logic for checking if user is logged in
+  const loggedIn = isToken();
   const { walletAddress, connectWallet, disconnectWallet } = useWalletStore();
   const [frameInfo, setFrameInfo] = useState<{ id: number; img: string } | null>(null);
-
-  useEffect(() => {
-    if (!loggedIn) {
-      void router.push("/");
-    }
-  }, [loggedIn, router]);
 
   useEffect(() => {
     const saved = localStorage.getItem("selectedFrame");
@@ -145,7 +140,12 @@ const ProfileTopSection = ({ userData }: { userData: UserData }) => {
 };
 
 const ProfileStatsSection = ({ userXP }: { userXP: number }) => {
-  const streak = 0; // Replace with your logic for fetching the user's streak
+  const [isHydrated, setIsHydrated] = useState(false);
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  const streak = useBoundStore((x) => x.streak);
   const league = "Bronze";
   const top3Finishes = 0;
 
@@ -180,15 +180,15 @@ const ProfileStatsSection = ({ userXP }: { userXP: number }) => {
       <h2 className="mb-5 text-2xl font-bold">Thống kê</h2>
       <div className="grid grid-cols-2 gap-3">
         <div className="flex gap-2 rounded-2xl border-2 border-gray-200 p-2 md:gap-3 md:px-6 md:py-4">
-          {streak === 0 ? <EmptyFireSvg /> : <FireSvg />}
+          {!isHydrated || streak === 0 ? <EmptyFireSvg /> : <FireSvg />}
           <div className="flex flex-col">
             <span
               className={[
                 "text-xl font-bold",
-                streak === 0 ? "text-gray-400" : "",
+                !isHydrated || streak === 0 ? "text-gray-400" : "",
               ].join(" ")}
             >
-              {streak}
+              {isHydrated ? streak : "--"}
             </span>
             <span className="text-sm text-gray-400 md:text-base">
               Chuỗi ngày
@@ -227,7 +227,7 @@ const ProfileStatsSection = ({ userXP }: { userXP: number }) => {
             </span>
           </div>
         </div>
-        {/* Token Balance */}
+        {/* NIHON Token Balance */}
         <div className="flex gap-2 rounded-2xl border-2 border-gray-200 p-2 md:gap-3 md:px-6 md:py-4 col-span-2 sm:col-span-1">
           <div className="h-10 w-10 flex items-center justify-center rounded-full bg-yellow-100 text-2xl">🪙</div>
           <div className="flex flex-col">
@@ -237,7 +237,16 @@ const ProfileStatsSection = ({ userXP }: { userXP: number }) => {
             </span>
           </div>
         </div>
-
+        {/* Gems Balance */}
+        <div className="flex gap-2 rounded-2xl border-2 border-gray-200 p-2 md:gap-3 md:px-6 md:py-4 col-span-2 sm:col-span-1">
+          <div className="h-10 w-10 flex items-center justify-center rounded-full bg-red-100 text-2xl">💎</div>
+          <div className="flex flex-col">
+            <span className="text-xl font-bold">{isHydrated ? useBoundStore.getState().lingots : "--"}</span>
+            <span className="text-sm text-gray-400 md:text-base">
+              Đá quý sở hữu
+            </span>
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -262,7 +271,7 @@ export async function getServerSideProps({ req }: GetServerSidePropsContext) {
     id: number;
   }>(myCookie);
 
-  const profile = await getProfile(jwtPayload.id);
+  const profile = await getProfile(jwtPayload.id, myCookie);
   console.log(profile);
 
   return {

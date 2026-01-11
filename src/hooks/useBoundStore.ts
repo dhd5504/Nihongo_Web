@@ -1,5 +1,6 @@
 import type { StateCreator } from "zustand";
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 import type { GoalXpSlice } from "~/stores/createGoalXpStore";
 import { createGoalXpSlice } from "~/stores/createGoalXpStore";
 import type { LanguageSlice } from "~/stores/createLanguageStore";
@@ -33,13 +34,23 @@ export type BoundStateCreator<SliceState> = StateCreator<
   SliceState
 >;
 
-export const useBoundStore = create<BoundState>((...args) => ({
-  ...createGoalXpSlice(...args),
-  ...createLanguageSlice(...args),
-  ...createLessonSlice(...args),
-  ...createLingotSlice(...args),
-  ...createSoundSettingsSlice(...args),
-  ...createStreakSlice(...args),
-  ...createUserSlice(...args),
-  ...createXpSlice(...args),
-}));
+export const useBoundStore = create<BoundState>()(
+  persist(
+    (...args) => ({
+      ...createGoalXpSlice(...args),
+      ...createLanguageSlice(...args),
+      ...createLessonSlice(...args),
+      ...createLingotSlice(...args),
+      ...createSoundSettingsSlice(...args),
+      ...createStreakSlice(...args),
+      ...createUserSlice(...args),
+      ...createXpSlice(...args),
+    }),
+    {
+      name: "nihongo-storage",
+      storage: createJSONStorage(() => localStorage),
+      // Partially persist only what's needed if some state should reset
+      // For now, persist everything
+    }
+  )
+);

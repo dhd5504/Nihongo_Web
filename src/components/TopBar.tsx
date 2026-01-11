@@ -74,11 +74,18 @@ export const TopBar = ({
   backgroundColor?: `bg-${string}`;
   borderColor?: `border-${string}`;
 }) => {
+  const [isHydrated, setIsHydrated] = useState(false);
+  React.useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
   const [menu, setMenu] = useState<MenuState>("HIDDEN");
   const [now, setNow] = useState(dayjs());
   const streak = useBoundStore((x) => x.streak);
   const lingots = useBoundStore((x) => x.lingots);
   const language = useBoundStore((x) => x.language);
+
+  if (!isHydrated) return <header className="fixed z-20 h-[58px] w-full" />;
 
   const handleLogout = () => {
     logout(() => {

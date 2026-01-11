@@ -294,11 +294,12 @@ export const Quiz = ({
 
     const passedTest = !(isTest && correctQuestions < challenges.length / 2);
 
-    // award XP: 10 per completed lesson when passed
+    // award XP: 10 per correct question when passed
     if (userId && passedTest) {
+      const totalXpEarned = correctQuestions * 10;
       try {
-        await addUserXp(Number(userId), Number(params.lessonId), 10);
-        increaseXp(10);
+        await addUserXp(Number(userId), Number(params.lessonId), totalXpEarned);
+        increaseXp(totalXpEarned);
       } catch (error) {
         console.error("Failed to add XP:", error);
       }

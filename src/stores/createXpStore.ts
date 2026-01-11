@@ -23,6 +23,7 @@ type XpByDate = Record<DateString, number>;
 
 export type XpSlice = {
   xpByDate: XpByDate;
+  goalRewardClaimedDates: DateString[];
   increaseXp: (by: number) => void;
   xpToday: () => number;
   xpThisWeek: () => number;
@@ -30,7 +31,31 @@ export type XpSlice = {
 
 export const createXpSlice: BoundStateCreator<XpSlice> = (set, get) => ({
   xpByDate: {},
-  increaseXp: (by: number) => set({ xpByDate: addXpToday(get().xpByDate, by) }),
+  goalRewardClaimedDates: [],
+  increaseXp: (by: number) => {
+    const today = toDateString(dayjs());
+    const newXpByDate = addXpToday(get().xpByDate, by);
+    const goalXp = (get() as any).goalXp || 200;
+    const xpToday = newXpByDate[today] ?? 0;
+
+    set({ xpByDate: newXpByDate });
+
+    // Extend streak on any XP gain
+    if ((get() as any).addToday) {
+      (get() as any).addToday();
+    }
+
+    // Reward for reaching daily goal
+    const claimedDates = get().goalRewardClaimedDates;
+    if (xpToday >= goalXp && !claimedDates.includes(today)) {
+      if ((get() as any).increaseLingots) {
+        (get() as any).increaseLingots(10); // Reward 10 gems for reaching goal
+      }
+      set((state) => ({
+        goalRewardClaimedDates: [...state.goalRewardClaimedDates, today],
+      }));
+    }
+  },
   xpToday: () => xpAt(get().xpByDate, dayjs()),
   xpThisWeek: () => {
     return sum(

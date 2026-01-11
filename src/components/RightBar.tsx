@@ -8,6 +8,7 @@ import {
   EmptyGemSvg,
   FireSvg,
   GemSvg,
+  GoldenTreasureSvg,
   LightningProgressSvg,
   LingotsTreasureChestSvg,
   TreasureProgressSvg,
@@ -20,6 +21,11 @@ import { LoginScreen } from "./LoginScreen";
 import { useLeaderboardRank } from "src/hooks/useLeaderboard";
 
 export const RightBar = () => {
+  const [isHydrated, setIsHydrated] = useState(false);
+  React.useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
   const loggedIn = useBoundStore((x) => x.loggedIn);
   const lingots = useBoundStore((x) => x.lingots);
   const streak = useBoundStore((x) => x.streak);
@@ -35,6 +41,8 @@ export const RightBar = () => {
 
   const [loginScreenState, setLoginScreenState] =
     useState<LoginScreenState>("HIDDEN");
+
+  if (!isHydrated) return <aside className="sticky top-0 hidden w-96 flex-col gap-6 self-start sm:flex" />;
 
   return (
     <>
@@ -580,16 +588,18 @@ const TreasureClosedSvg = (props: ComponentProps<"svg">) => {
 const XpProgressSection = () => {
   const xpToday = useBoundStore((x) => x.xpToday());
   const goalXp = useBoundStore((x) => x.goalXp);
+  const isGoalReached = xpToday >= goalXp;
+
   return (
     <article className="flex flex-col gap-5 rounded-2xl border-2 border-gray-200 p-6 font-bold text-gray-700">
       <div className="flex items-center justify-between">
         <h2 className="text-xl">Tích lũy XP</h2>
-        <Link href="/settings/coach" className="uppercase text-blue-400">
+        <Link href="/settings/coach" className="uppercase text-blue-400 text-xs">
           Chỉnh sửa mục tiêu
         </Link>
       </div>
       <div className="flex gap-5">
-        <TreasureClosedSvg />
+        {isGoalReached ? <GoldenTreasureSvg className="w-20 h-20 -mt-2" /> : <TreasureClosedSvg />}
         <div className="flex grow flex-col justify-around">
           <h3 className="font-normal text-gray-500">Mục tiêu hàng ngày</h3>
           <div className="flex items-center gap-5">
@@ -607,6 +617,11 @@ const XpProgressSection = () => {
               {xpToday}/{goalXp} XP
             </div>
           </div>
+          {isGoalReached && (
+            <p className="text-xs text-green-500 font-bold mt-1 animate-bounce">
+              🎉 Mục tiêu đã đạt! +10 Đá quý
+            </p>
+          )}
         </div>
       </div>
     </article>

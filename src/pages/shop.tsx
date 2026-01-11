@@ -11,8 +11,14 @@ import { useToast } from "~/context/toast";
 import { getTokenContract, getShopContract, SHOP_ADDRESS } from "~/utils/contracts";
 import { ethers } from "ethers";
 
+import { useBoundStore } from "~/hooks/useBoundStore";
+
 const Shop: NextPage = () => {
-  const streakFreezes = 0;
+  const lingots = useBoundStore((x) => x.lingots);
+  const streakFreezes = useBoundStore((x) => x.streakFreezes);
+  const hasDoubleOrNothing = useBoundStore((x) => x.hasDoubleOrNothing);
+  const buyStreakFreeze = useBoundStore((x) => x.buyStreakFreeze);
+  const buyDoubleOrNothing = useBoundStore((x) => x.buyDoubleOrNothing);
 
   const { walletAddress, provider } = useWalletStore();
   const { addToast } = useToast();
@@ -63,10 +69,6 @@ const Shop: NextPage = () => {
 
     try {
       const network = await provider.getNetwork();
-      console.log("Current Network:", network.chainId, network.name);
-      console.log("Token Address:", process.env.NEXT_PUBLIC_TOKEN_ADDRESS);
-      console.log("Shop Address:", process.env.NEXT_PUBLIC_SHOP_ADDRESS);
-
       if (Number(network.chainId) !== 11155111) { // Sepolia ChainID
         addToast("Wrong Network! Please switch to Sepolia.", "error");
         return;
@@ -124,6 +126,32 @@ const Shop: NextPage = () => {
     }
   };
 
+  const handleBuyStreakFreeze = () => {
+    if (lingots < 10) {
+      addToast("Không đủ đá quý!", "error");
+      return;
+    }
+    if (streakFreezes >= 2) {
+      addToast("Bạn đã đạt giới hạn Streak Freeze!", "info");
+      return;
+    }
+    buyStreakFreeze();
+    addToast("Đã mua Streak Freeze thành công!", "success");
+  };
+
+  const handleBuyDoubleOrNothing = () => {
+    if (lingots < 5) {
+      addToast("Không đủ đá quý!", "error");
+      return;
+    }
+    if (hasDoubleOrNothing) {
+      addToast("Bạn đã kích hoạt Double or Nothing rồi!", "info");
+      return;
+    }
+    buyDoubleOrNothing();
+    addToast("Đã kích hoạt Double or Nothing! Hãy duy trì chuỗi 7 ngày.", "success");
+  };
+
   return (
     <div>
       <TopBar />
@@ -140,12 +168,16 @@ const Shop: NextPage = () => {
                   Streak Freeze cho phép chuỗi của bạn được giữ nguyên trong một lần
                   cả ngày không hoạt động.
                 </p>
-                <div className="w-fit rounded-full bg-gray-200 px-3 py-1 text-sm font-bold uppercase text-gray-400">
+                <div className={`w-fit rounded-full px-3 py-1 text-sm font-bold uppercase ${streakFreezes > 0 ? "bg-blue-100 text-blue-500" : "bg-gray-200 text-gray-400"}`}>
                   {streakFreezes} / 2 có sẵn
                 </div>
                 <button
-                  className="flex w-fit items-center gap-1 rounded-2xl border-2 border-gray-300 bg-white px-4 py-2 text-sm font-bold uppercase text-gray-300"
-                  disabled
+                  onClick={handleBuyStreakFreeze}
+                  disabled={streakFreezes >= 2 || lingots < 10}
+                  className={`flex w-fit items-center gap-1 rounded-2xl border-b-4 px-4 py-2 text-sm font-bold uppercase transition active:translate-y-1 active:border-b-0
+                    ${streakFreezes >= 2 || lingots < 10
+                      ? "bg-white border-gray-300 text-gray-300 cursor-not-allowed"
+                      : "bg-white border-gray-300 text-blue-400 hover:bg-gray-50"}`}
                 >
                   MUA: <EmptyGemSvg /> 10
                 </button>
@@ -159,10 +191,14 @@ const Shop: NextPage = () => {
                   Hãy nỗ lực gấp đôi số tiền cược năm lingot của bạn bằng cách duy trì chuỗi thắng trong bảy ngày liên tiếp.
                 </p>
                 <button
-                  className="flex w-fit items-center gap-1 rounded-2xl border-2 border-gray-300 bg-white px-4 py-2 text-sm font-bold uppercase text-gray-300"
-                  disabled
+                  onClick={handleBuyDoubleOrNothing}
+                  disabled={hasDoubleOrNothing || lingots < 5}
+                  className={`flex w-fit items-center gap-1 rounded-2xl border-b-4 px-4 py-2 text-sm font-bold uppercase transition active:translate-y-1 active:border-b-0
+                    ${hasDoubleOrNothing || lingots < 5
+                      ? "bg-white border-gray-300 text-gray-300 cursor-not-allowed"
+                      : "bg-white border-gray-300 text-orange-400 hover:bg-gray-50"}`}
                 >
-                  MUA: <EmptyGemSvg /> 5
+                  {hasDoubleOrNothing ? "ĐÃ KÍCH HOẠT" : <>MUA: <EmptyGemSvg /> 5</>}
                 </button>
               </section>
             </div>
