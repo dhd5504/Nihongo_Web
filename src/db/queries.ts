@@ -23,6 +23,28 @@ export type Unit = {
   lessons: Lesson[];
 };
 
+export type ChallengeOption = {
+  id: number | string;
+  challengeId: number | string;
+  option: string;
+  isCorrect: boolean;
+  imageSrc?: string;
+  audioSrc?: string;
+};
+
+export type PracticeChallenge = {
+  id: number | string;
+  challengeId: number | string;
+  text: string;
+  correct: string;
+  question?: string;
+  imageSrc?: string;
+  audioSrc?: string;
+  challengeOptions: ChallengeOption[];
+  completed: boolean;
+  type: string;
+};
+
 export const getPractices = () => {
   return;
 };
@@ -178,8 +200,8 @@ export const getLessonById = async (lessonId: number, token?: string) => {
 export const getCurrentLesson = async (userId: number, token?: string) => {
   const units = await getUnits(userId, token);
   const currentLesson = units
-    .flatMap((unit: { lessons: any[] }) => unit.lessons)
-    .find((lesson: { status: string }) => lesson.status === "current");
+    .flatMap((unit: Unit) => unit.lessons)
+    .find((lesson: Lesson) => lesson.status === "current");
 
   if (!currentLesson) return null;
   return await getLessonById(currentLesson.id, token);
@@ -187,13 +209,13 @@ export const getCurrentLesson = async (userId: number, token?: string) => {
 
 export const getPreviousLessons = async (userId: number, token?: string) => {
   const units = await getUnits(userId, token);
-  const lessons = units.flatMap((unit: { lessons: any[] }) => unit.lessons);
+  const lessons = units.flatMap((unit: Unit) => unit.lessons);
   const currentLesson = lessons.find(
-    (lesson: { status: string }) => lesson.status === "current",
+    (lesson: Lesson) => lesson.status === "current",
   );
   if (!currentLesson) return [];
   return lessons.filter(
-    (lesson: { id: number }) => lesson.id < currentLesson.id,
+    (lesson: Lesson) => lesson.id < currentLesson.id,
   );
 };
 
@@ -214,8 +236,8 @@ export const getPracticeChallenges = async (userId: number, token?: string) => {
 export const isLessonCompleted = async (lessonId: number, userId: number, token?: string) => {
   const units = await getUnits(userId, token);
   const lesson = units
-    .flatMap((unit: { lessons: any[] }) => unit.lessons)
-    .find((lesson: { id: number; status: string }) => lesson.id === lessonId);
+    .flatMap((unit: Unit) => unit.lessons)
+    .find((lesson: Lesson) => lesson.id === lessonId);
 
   return lesson?.status === "completed" || false;
 };
@@ -246,10 +268,10 @@ export const getPracticeUnit = async (
   userId: number,
   unitId: number | undefined,
   token?: string,
-) => {
+): Promise<PracticeChallenge[] | null> => {
   if (unitId === undefined) return null;
 
-  const response = await axios.get(
+  const response = await axios.get<PracticeChallenge[]>(
     `${API_BASE_URL}/api/questions/practice-by-unit?userId=${userId}&unitId=${unitId}&type=MULTIPLE_CHOICE`,
     { headers: getAuthHeaders(token) }
   );

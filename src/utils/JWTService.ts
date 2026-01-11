@@ -77,7 +77,7 @@ export function setToken(token: string) {
   Cookies.set("token", token, { expires: 1, secure: true, sameSite: "Strict" });
 }
 
-export function manualParsedCoolies(cookies: string) {
+export function manualParsedCookies(cookies: string) {
   const parsedCookies: Record<string, string> = cookies
     .split("; ")
     .reduce((acc, cookie) => {

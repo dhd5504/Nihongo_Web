@@ -6,7 +6,7 @@ import { LeftBar } from "~/components/LeftBar";
 import { SettingsRightNav } from "~/components/SettingsRightNav";
 import { TopBar } from "~/components/TopBar";
 import { getProfile, updateProfile } from "~/db/queries";
-import { getIdUserByToken, manualParsedCoolies } from "~/utils/JWTService";
+import { getIdUserByToken, manualParsedCookies } from "~/utils/JWTService";
 import { UserData } from "../profile";
 import { useToast } from "~/context/toast";
 import Fetching from "~/components/Fetching";
@@ -399,7 +399,7 @@ export default Account;
 export async function getServerSideProps({ req }: GetServerSidePropsContext) {
   const cookies = String(req?.headers?.cookie ?? "");
 
-  const parsedCookies = manualParsedCoolies(cookies);
+  const parsedCookies = manualParsedCookies(cookies);
 
   const myCookie = parsedCookies["token"] || null;
 

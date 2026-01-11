@@ -1,7 +1,8 @@
 import { ethers } from "ethers";
+import { env } from "~/env.mjs";
 
-export const TOKEN_ADDRESS = process.env.NEXT_PUBLIC_TOKEN_ADDRESS || "";
-export const SHOP_ADDRESS = process.env.NEXT_PUBLIC_SHOP_ADDRESS || "";
+export const TOKEN_ADDRESS = env.NEXT_PUBLIC_TOKEN_ADDRESS;
+export const SHOP_ADDRESS = env.NEXT_PUBLIC_SHOP_ADDRESS;
 
 export const TOKEN_ABI = [
     "function mintWithSignature(uint256 amount, uint256 nonce, uint256 lessonId, bytes calldata signature) external",

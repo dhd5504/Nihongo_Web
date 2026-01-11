@@ -84,10 +84,12 @@ export const LoginScreen = ({
   });
 
   const [errors, setErrors] = useState<{
+    username: string;
     email: string;
     password: string;
     confirmPassword: string;
   }>({
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -105,6 +107,7 @@ export const LoginScreen = ({
   const logInAndSetUserProperties = async () => {
     if (loginScreenState === "SIGNUP") {
       setErrors({
+        username: "",
         email: "",
         password: "",
         confirmPassword: "",
@@ -146,13 +149,13 @@ export const LoginScreen = ({
           }
           if (error.response?.data?.message) {
             const message = String(error.response.data.message);
-            setErrors((prev) => ({
-              ...prev,
-              email:
-                message === "Tên đăng nhập đã tồn tại."
-                  ? "Email đã được đăng ký"
-                  : message,
-            }));
+            if (message === "Tên đăng nhập đã tồn tại.") {
+              setErrors((prev) => ({ ...prev, username: message }));
+            } else if (message.includes("Email")) {
+              setErrors((prev) => ({ ...prev, email: "Email đã được đăng ký" }));
+            } else {
+              setErrors((prev) => ({ ...prev, email: message }));
+            }
             return;
           }
         }
@@ -291,14 +294,17 @@ export const LoginScreen = ({
                     })
                   }
                 />
+                {errors.username && (
+                  <p className="mt-1 text-xs text-rose-500">{errors.username}</p>
+                )}
               </>
             )}
             <input
               className="grow rounded-2xl border-2 border-gray-200 bg-gray-50 px-4 py-3"
               placeholder={
                 loginScreenState === "LOGIN"
-                  ? "Tên đăng nhập"
-                  : "Username"
+                  ? "Email"
+                  : "Email"
               }
               value={form.email}
               onChange={(e) =>
@@ -362,8 +368,8 @@ export const LoginScreen = ({
           </div>
           <button
             className={`rounded-2xl border-b-4 py-3 font-bold uppercase text-white transition ${loading
-                ? "cursor-not-allowed border-gray-400 bg-gray-300"
-                : "border-blue-500 bg-blue-400 hover:brightness-110"
+              ? "cursor-not-allowed border-gray-400 bg-gray-300"
+              : "border-blue-500 bg-blue-400 hover:brightness-110"
               }`}
             onClick={logInAndSetUserProperties}
             disabled={loading}

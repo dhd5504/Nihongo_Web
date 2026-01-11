@@ -15,7 +15,7 @@ import {
   SettingsGearSvg,
 } from "~/components/Svgs";
 import { getProfile } from "~/db/queries";
-import { getToken, manualParsedCoolies } from "~/utils/JWTService";
+import { getToken, manualParsedCookies } from "~/utils/JWTService";
 import { useWalletStore } from "~/stores/useWalletStore";
 import { getTokenContract } from "~/utils/contracts";
 import { ethers } from "ethers";
@@ -246,7 +246,7 @@ const ProfileStatsSection = ({ userXP }: { userXP: number }) => {
 export async function getServerSideProps({ req }: GetServerSidePropsContext) {
   const cookies = String(req?.headers?.cookie ?? "");
 
-  const parsedCookies = manualParsedCoolies(cookies);
+  const parsedCookies = manualParsedCookies(cookies);
 
   const myCookie = parsedCookies["token"] || null;
 

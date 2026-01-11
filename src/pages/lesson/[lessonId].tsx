@@ -7,7 +7,7 @@ import FlashcardSet from "~/lesson/flashcard";
 import { type GetServerSidePropsContext, type NextPage } from "next";
 import { useEffect, useState } from "react";
 import { SessionKey, SessionStorage } from "~/utils/session-storage";
-import { manualParsedCoolies } from "~/utils/JWTService";
+import { manualParsedCookies } from "~/utils/JWTService";
 import { jwtDecode } from "jwt-decode";
 import Link from "next/link";
 
@@ -140,7 +140,7 @@ export async function getServerSideProps({
 }: GetServerSidePropsContext) {
   const cookies = String(req?.headers?.cookie ?? "");
 
-  const parsedCookies = manualParsedCoolies(cookies);
+  const parsedCookies = manualParsedCookies(cookies);
 
   const myCookie = parsedCookies["token"] || null;
 

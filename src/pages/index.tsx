@@ -4,7 +4,7 @@ import React from "react";
 import { LanguageHeader } from "~/components/LanguageHeader";
 import { useLoginScreen, LoginScreen } from "~/components/LoginScreen";
 import { LanguageCarousel } from "~/components/LanguageCarousel";
-import { manualParsedCoolies } from "~/utils/JWTService";
+import { manualParsedCookies } from "~/utils/JWTService";
 
 const Home: NextPage = () => {
   const { loginScreenState, setLoginScreenState } = useLoginScreen();
@@ -47,7 +47,7 @@ export default Home;
 export function getServerSideProps({ req }: GetServerSidePropsContext) {
   const cookies = String(req.headers?.cookie ?? "");
 
-  const parsedCookies = manualParsedCoolies(cookies);
+  const parsedCookies = manualParsedCookies(cookies);
 
   const myCookie = parsedCookies["token"] || null;
 

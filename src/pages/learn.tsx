@@ -8,7 +8,7 @@ import { getUnits, getUserProgress } from "~/db/queries";
 import { Header } from "~/components/header";
 import { Unit } from "~/components/unit";
 import { type GetServerSidePropsContext, type NextPage } from "next";
-import { manualParsedCoolies } from "~/utils/JWTService";
+import { manualParsedCookies } from "~/utils/JWTService";
 import { jwtDecode } from "jwt-decode";
 
 type LearnPageProps = {
@@ -132,7 +132,7 @@ export default LearnPage;
 export async function getServerSideProps({ req }: GetServerSidePropsContext) {
   const cookies = String(req?.headers?.cookie ?? "");
 
-  const parsedCookies = manualParsedCoolies(cookies);
+  const parsedCookies = manualParsedCookies(cookies);
 
   const myCookie = parsedCookies["token"] || null;
   const levelCookie = parsedCookies["level"] || null;

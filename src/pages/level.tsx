@@ -8,7 +8,7 @@ import { FeedWrapper } from "~/components/feedwrapper";
 import { Header } from "~/components/header";
 import { Unit } from "~/components/unit";
 import { getUnits, getUserProgress } from "~/db/queries";
-import { manualParsedCoolies } from "~/utils/JWTService";
+import { manualParsedCookies } from "~/utils/JWTService";
 
 const LevelPage: NextPage<{
   userProgress: { points: number; lessonPercentage: number };
@@ -80,7 +80,7 @@ export async function getServerSideProps({
   query,
 }: GetServerSidePropsContext) {
   const cookies = String(req?.headers?.cookie ?? "");
-  const parsedCookies = manualParsedCoolies(cookies);
+  const parsedCookies = manualParsedCookies(cookies);
   const token = parsedCookies["token"] || null;
 
   if (!token) {

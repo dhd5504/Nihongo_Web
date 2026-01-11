@@ -1,5 +1,5 @@
 import { FeedWrapper } from "~/components/feedwrapper";
-import { getPracticeUnit, getUnits, type Unit } from "~/db/queries";
+import { getPracticeUnit, getUnits, type Unit, type PracticeChallenge } from "~/db/queries";
 import { Header } from "~/components/header";
 import { UnitBanner } from "~/components/unit-banner";
 import { Quiz } from "~/lesson/quiz";
@@ -8,7 +8,7 @@ import { LeftBar } from "~/components/LeftBar";
 import { RightBar } from "~/components/RightBar";
 import { TopBar } from "~/components/TopBar";
 import { type GetServerSidePropsContext, type NextPage } from "next";
-import { manualParsedCoolies } from "~/utils/JWTService";
+import { manualParsedCookies } from "~/utils/JWTService";
 import { jwtDecode } from "jwt-decode";
 import Link from "next/link";
 
@@ -16,25 +16,7 @@ type Props = {
   children: React.ReactNode;
 };
 
-type PracticeChallenge = {
-  id: number | string;
-  challengeId: number | string;
-  text: string;
-  correct: string;
-  question?: string;
-  imageSrc?: string;
-  audioSrc?: string;
-  challengeOptions: {
-    id: number | string;
-    challengeId: number | string;
-    option: string;
-    isCorrect: boolean;
-    imageSrc?: string;
-    audioSrc?: string;
-  }[];
-  completed: boolean;
-  type: string;
-};
+
 
 type PracticePageProps = {
   practiceLessons: PracticeChallenge[];
@@ -155,7 +137,7 @@ export async function getServerSideProps({
 }: GetServerSidePropsContext) {
   const cookies = String(req?.headers?.cookie ?? "");
 
-  const parsedCookies = manualParsedCoolies(cookies);
+  const parsedCookies = manualParsedCookies(cookies);
 
   const myCookie = parsedCookies["token"] || null;
 

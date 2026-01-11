@@ -3,7 +3,7 @@ import { env } from "~/env.mjs";
 
 type ChatMessage = { role: "user" | "assistant"; text: string };
 
-const GEMINI_MODEL = "gemini-pro";
+const GEMINI_MODEL = "gemini-2.5-flash";
 
 export default async function handler(
   req: NextApiRequest,
@@ -19,25 +19,20 @@ export default async function handler(
     return res.status(500).json({ message: "Missing GEMINI_API_KEY" });
   }
 
-  const { messages } = req.body as { messages?: ChatMessage[] };
+  const { messages, level } = req.body as { messages?: ChatMessage[], level?: string };
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ message: "messages array is required" });
   }
 
-  const systemInstructions = [
-    "Bạn là trợ lý AI chuyên nghiệp của Nihongo, app học tiếng Nhật.",
-    "Nhiệm vụ: Giải thích từ vựng, ngữ pháp, kanji bằng tiếng Việt thân thiện.",
-    "Yêu cầu: Luôn có ví dụ kèm Furigana/Romaji và dịch nghĩa.",
-    "Giới hạn: Chỉ trả lời các vấn đề liên quan học tiếng Nhật.",
-    "Định dạng: Sử dụng Markdown."
-  ].join("\n");
+  const userLevel = level || "N5";
+  const systemPrompt = `[VAI TRÒ: Bạn là trợ lý AI của dự án Nihongo. TRÌNH ĐỘ NGƯỜI DÙNG: ${userLevel}. GIỚI HẠN: Chỉ trả lời về tiếng Nhật. YÊU CẦU: Giải thích ngữ pháp/từ vựng phù hợp với trình độ ${userLevel}, luôn có ví dụ kèm Furigana/Romaji và dịch nghĩa. PHONG CÁCH: Thân thiện, sử dụng tiếng Việt.]\n\n`;
 
   const contents = messages.map((m, index) => {
-    let text = m.text;
-    // Chèn chỉ dẫn vào tin nhắn cuối cùng của user để AI luôn nắm được yêu cầu
-    if (index === messages.length - 1 && m.role === "user") {
-      text = `[SYSTEM: ${systemInstructions}]\n\nNgười dùng hỏi: ${m.text}`;
-    }
+    // Chỉ lồng prompt vào tin nhắn đầu tiên của cuộc hội thoại để thiết lập ngữ cảnh mà không làm tốn dung lượng các tin nhắn sau
+    const text = (index === 0 && m.role === "user")
+      ? systemPrompt + m.text
+      : m.text;
+
     return {
       role: m.role === "assistant" ? "model" : "user",
       parts: [{ text }],

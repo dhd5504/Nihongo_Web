@@ -23,6 +23,8 @@ export const env = createEnv({
     NEXT_PUBLIC_API_BASE_URL: z.string().url(),
     NEXT_PUBLIC_W3_API_BASE_URL: z.string().url(),
     NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: z.string().min(1),
+    NEXT_PUBLIC_TOKEN_ADDRESS: z.string().min(1),
+    NEXT_PUBLIC_SHOP_ADDRESS: z.string().min(1),
   },
 
   /**
@@ -39,5 +41,7 @@ export const env = createEnv({
     NEXT_PUBLIC_W3_API_BASE_URL: process.env.NEXT_PUBLIC_W3_API_BASE_URL,
     NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME:
       process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+    NEXT_PUBLIC_TOKEN_ADDRESS: process.env.NEXT_PUBLIC_TOKEN_ADDRESS,
+    NEXT_PUBLIC_SHOP_ADDRESS: process.env.NEXT_PUBLIC_SHOP_ADDRESS,
   },
 });

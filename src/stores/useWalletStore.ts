@@ -29,19 +29,20 @@ export const useWalletStore = create<WalletState>((set) => ({
                 set({ walletAddress: address, provider });
 
                 // Listen for account changes
-                window.ethereum.on('accountsChanged', (accounts: string[]) => {
-                    if (accounts.length > 0) {
-                        set({ walletAddress: accounts[0] });
-                    } else {
-                        set({ walletAddress: null });
-                    }
-                });
-
+                if (window.ethereum?.on) {
+                    window.ethereum.on('accountsChanged', (accounts: string[]) => {
+                        if (accounts.length > 0) {
+                            set({ walletAddress: accounts[0] });
+                        } else {
+                            set({ walletAddress: null });
+                        }
+                    });
+                }
             } catch (error) {
                 console.error("Failed to connect wallet:", error);
             }
         } else {
-            alert("Please install MetaMask!");
+            window.open("https://metamask.io/download/", "_blank");
         }
     },
     disconnectWallet: () => set({ walletAddress: null, provider: null }),
