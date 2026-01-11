@@ -42,7 +42,10 @@ type PracticePageProps = {
   unitId: string | null;
 };
 
-const PracticeLayout = ({ children }: Props) => {
+const PracticeLayout = ({ children, isQuiz }: Props & { isQuiz?: boolean }) => {
+  if (isQuiz) {
+    return <div className="flex min-h-screen flex-col">{children}</div>;
+  }
   return (
     <div className="flex min-h-screen flex-col">
       <TopBar />
@@ -67,8 +70,8 @@ const PracticePage: NextPage<PracticePageProps> = ({
 }) => {
   if (unitId) {
     return (
-      <PracticeLayout>
-        <div className="flex flex-1 flex-col md:ml-32 lg:ml-64">
+      <PracticeLayout isQuiz>
+        <div className="flex flex-1 flex-col ">
           {practiceLessons.length === 0 ? (
             <div className="flex h-screen w-screen items-center justify-center bg-gray-100">
               <div className="text-center">

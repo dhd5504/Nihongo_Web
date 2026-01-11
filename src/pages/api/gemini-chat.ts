@@ -3,7 +3,7 @@ import { env } from "~/env.mjs";
 
 type ChatMessage = { role: "user" | "assistant"; text: string };
 
-const GEMINI_MODEL = "gemini-2.5-flash";
+const GEMINI_MODEL = "gemini-pro";
 
 export default async function handler(
   req: NextApiRequest,
@@ -24,10 +24,25 @@ export default async function handler(
     return res.status(400).json({ message: "messages array is required" });
   }
 
-  const contents = messages.map((m) => ({
-    role: m.role === "assistant" ? "model" : "user",
-    parts: [{ text: m.text }],
-  }));
+  const systemInstructions = [
+    "Bạn là trợ lý AI chuyên nghiệp của Nihongo, app học tiếng Nhật.",
+    "Nhiệm vụ: Giải thích từ vựng, ngữ pháp, kanji bằng tiếng Việt thân thiện.",
+    "Yêu cầu: Luôn có ví dụ kèm Furigana/Romaji và dịch nghĩa.",
+    "Giới hạn: Chỉ trả lời các vấn đề liên quan học tiếng Nhật.",
+    "Định dạng: Sử dụng Markdown."
+  ].join("\n");
+
+  const contents = messages.map((m, index) => {
+    let text = m.text;
+    // Chèn chỉ dẫn vào tin nhắn cuối cùng của user để AI luôn nắm được yêu cầu
+    if (index === messages.length - 1 && m.role === "user") {
+      text = `[SYSTEM: ${systemInstructions}]\n\nNgười dùng hỏi: ${m.text}`;
+    }
+    return {
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text }],
+    };
+  });
 
   try {
     const response = await fetch(

@@ -15,6 +15,7 @@ import {
 } from "./Svgs";
 import { logout } from "~/utils/JWTService";
 import { ChatBotIcon } from "./ChatBotIcon";
+import { useToast } from "~/context/toast";
 
 const EmptyFireTopBarSvg = (props: ComponentProps<"svg">) => {
   return (
@@ -190,27 +191,25 @@ export const TopBar = ({
                   </div>
                 );
 
-              case "MORE":
+              case "MORE": {
+                const { addToast } = useToast();
+                const handleComingSoon = () => addToast("Tính năng đang phát triển!", "info");
                 return (
                   <div className="flex grow flex-col">
-                    <Link
-                      className="flex items-center gap-2 p-2 font-bold text-gray-700"
-                      href="https://podcast.duolingo.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      className="flex items-center gap-2 p-2 font-bold text-gray-700 text-left"
+                      onClick={handleComingSoon}
                     >
                       <PodcastIconSvg className="h-10 w-10" />
                       Podcast
-                    </Link>
-                    <Link
-                      className="flex items-center gap-2 border-t-2 border-gray-300 p-2 font-bold text-gray-700"
-                      href="https://schools.duolingo.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    </button>
+                    <button
+                      className="flex items-center gap-2 border-t-2 border-gray-300 p-2 font-bold text-gray-700 text-left"
+                      onClick={handleComingSoon}
                     >
                       <GlobeIconSvg className="h-10 w-10" />
                       Schools
-                    </Link>
+                    </button>
                     <Link
                       className="flex items-center gap-2 border-t-2 border-gray-300 p-2 font-bold text-gray-700"
                       href="/chat"
@@ -230,7 +229,7 @@ export const TopBar = ({
                     </button>
                   </div>
                 );
-
+              }
               case "HIDDEN":
                 return null;
             }

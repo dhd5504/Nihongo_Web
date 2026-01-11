@@ -361,10 +361,23 @@ export const LoginScreen = ({
             )}
           </div>
           <button
-            className="rounded-2xl border-b-4 border-blue-500 bg-blue-400 py-3 font-bold uppercase text-white transition hover:brightness-110"
+            className={`rounded-2xl border-b-4 py-3 font-bold uppercase text-white transition ${loading
+                ? "cursor-not-allowed border-gray-400 bg-gray-300"
+                : "border-blue-500 bg-blue-400 hover:brightness-110"
+              }`}
             onClick={logInAndSetUserProperties}
+            disabled={loading}
           >
-            {loginScreenState === "LOGIN" ? "Đăng nhập" : "Tạo tài khoản"}
+            {loading ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                Đang xử lý...
+              </div>
+            ) : loginScreenState === "LOGIN" ? (
+              "Đăng nhập"
+            ) : (
+              "Tạo tài khoản"
+            )}
           </button>
           <div className="flex items-center gap-2"></div>
 

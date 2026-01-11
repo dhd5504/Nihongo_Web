@@ -9,6 +9,7 @@ import { GlobeIconSvg, PodcastIconSvg } from "./Svgs";
 import { useBoundStore } from "src/hooks/useBoundStore";
 import { logout } from "~/utils/JWTService";
 import { ChatBotIcon } from "./ChatBotIcon";
+import { useToast } from "~/context/toast";
 
 type SidebarTab = Tab | "Chat";
 
@@ -44,6 +45,7 @@ export const LeftBar = ({
   const [moreMenuShown, setMoreMenuShown] = useState(false);
   const [loginScreenState, setLoginScreenState] =
     useState<LoginScreenState>("HIDDEN");
+  const { addToast } = useToast();
 
   const bottomBarItems = useBottomBarItems();
   const isChatSelected = selectedTab === "Chat";
@@ -112,24 +114,20 @@ export const LeftBar = ({
               ].join(" ")}
             >
               <div className="flex flex-col py-2">
-                <Link
+                <button
                   className="flex items-center gap-4 px-5 py-2 text-left uppercase hover:bg-gray-100"
-                  href="https://schools.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  onClick={() => addToast("Tính năng đang phát triển!", "info")}
                 >
                   <GlobeIconSvg className="h-10 w-10" />
                   Trường học
-                </Link>
-                <Link
+                </button>
+                <button
                   className="flex items-center gap-4 px-5 py-2 text-left uppercase hover:bg-gray-100"
-                  href="https://podcast.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  onClick={() => addToast("Tính năng đang phát triển!", "info")}
                 >
                   <PodcastIconSvg className="h-10 w-10" />
                   Podcast
-                </Link>
+                </button>
               </div>
               <div className="flex flex-col border-t-2 border-gray-300 py-2">
                 <Link
