@@ -29,6 +29,7 @@ import { Header } from "./header";
 import { QuestionBubble } from "./question-bubble";
 import { ResultCard } from "./result-card";
 import { PairMatching } from "./pair-matching";
+import { OrderChallenge } from "./order-challenge";
 
 type QuizProps = {
   initialPercentage: number;
@@ -56,6 +57,7 @@ type QuizProps = {
       japanese: string;
       vietnamese: string;
     }[];
+    words?: string[];
   }[];
   isTest: boolean;
   isLesson: boolean;
@@ -109,6 +111,8 @@ export const Quiz = ({
   const [selectedOption, setSelectedOption] = useState<number>();
   const [status, setStatus] = useState<"none" | "wrong" | "correct">("none");
   const [isPairingCompleted, setIsPairingCompleted] = useState(false);
+  const [isOrderingCorrect, setIsOrderingCorrect] = useState(false);
+  const [hasOrderingAction, setHasOrderingAction] = useState(false);
 
   const challenge = challenges[activeIndex];
   const options = challenge?.challengeOptions ?? [];
@@ -116,6 +120,8 @@ export const Quiz = ({
   const onNext = () => {
     setActiveIndex((current) => current + 1);
     setIsPairingCompleted(false);
+    setIsOrderingCorrect(false);
+    setHasOrderingAction(false);
   };
 
   const onSelect = (id: number) => {
@@ -125,12 +131,10 @@ export const Quiz = ({
   };
 
   const onContinue = async () => {
-    if (!selectedOption && !isPairingCompleted) return;
+    if (!selectedOption && !isPairingCompleted && !hasOrderingAction) return;
 
     if (status === "wrong") {
-      if (isLesson) {
-        onNext();
-      }
+      onNext();
       setStatus("none");
       setSelectedOption(undefined);
       return;
@@ -155,6 +159,26 @@ export const Quiz = ({
           ch.id === challenge?.id ? { ...ch, completed: true } : ch,
         ),
       );
+      return;
+    }
+
+    if (challenge && challenge.type === "SENTENCE_ORDERING") {
+      if (isOrderingCorrect) {
+        void correctControls.play();
+        setCorrectQuestions(correctQuestions + 1);
+        setStatus("correct");
+        setPercentage((prev) => prev + 100 / challenges.length);
+        setChallenges((prevChallenges) =>
+          prevChallenges.map((ch) =>
+            ch.id === challenge?.id ? { ...ch, completed: true } : ch,
+          ),
+        );
+        await updateQuestionRightAnswer(Number(challenge?.id), Number(userId));
+      } else {
+        void incorrectControls.play();
+        setStatus("wrong");
+        await updateQuestionWrongAnswer(Number(challenge?.id), Number(userId));
+      }
       return;
     }
 
@@ -410,6 +434,18 @@ export const Quiz = ({
                   }}
                   disabled={pending || status === "correct"}
                 />
+              ) : challenge.type === "SENTENCE_ORDERING" ? (
+                <OrderChallenge
+                  key={challenge.id}
+                  words={challenge.words || []}
+                  correctOrder={challenge.correct || ""}
+                  onComplete={(isCorrect) => {
+                    setIsOrderingCorrect(isCorrect);
+                    setHasOrderingAction(true);
+                  }}
+                  disabled={pending}
+                  status={status}
+                />
               ) : (
                 <Challenge
                   options={options}
@@ -426,7 +462,7 @@ export const Quiz = ({
       </div>
 
       <Footer
-        disabled={pending || (challenge.type === "PAIR_MATCHING" ? !isPairingCompleted : !selectedOption)}
+        disabled={pending || (challenge.type === "PAIR_MATCHING" ? !isPairingCompleted : challenge.type === "SENTENCE_ORDERING" ? !hasOrderingAction : !selectedOption)}
         status={status}
         onCheck={onContinue}
         isTest={isTest}
